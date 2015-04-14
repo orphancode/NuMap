@@ -14,6 +14,7 @@
 #include "math_functions.h"
 #include "paths.h"
 #include "file_utilities.h"
+#include <algorithm>    // std::sort
 
 using std::ifstream;
 using std::ofstream;
@@ -35,7 +36,7 @@ struct genome_coord_pair{
   int pos2;
   double value1;
   double value2;
-  int dist; 
+  int dist;
   double qvalue;
   string entry;
 };
@@ -62,7 +63,7 @@ int main(int argc, char* argv[]){
   pars.require("dyad_match_file", "dyad_match_file", STRING_TYPE);
   pars.require("mock_dyad_match_file", "mock_dyad_match_file", STRING_TYPE);
   pars.require("output_file", "output_file", STRING_TYPE);
-  
+
   if(!pars.enforce()){
     exit(1);
   }
@@ -73,7 +74,7 @@ int main(int argc, char* argv[]){
 
   string line;
   char delim = '\t';
-  
+
   ifstream ifstr1(dyad_match_fname.c_str());
 
   vector<genome_coord_pair> dyad_matches;
@@ -88,17 +89,17 @@ int main(int argc, char* argv[]){
       cur_match.pos2 = atoi(line_fields[2].c_str());
       cur_match.value1 = atof(line_fields[3].c_str());
       cur_match.value2 = atof(line_fields[4].c_str());
-      
+
       cur_match.entry = line;
       cur_match.dist = abs(cur_match.pos1 - cur_match.pos2);
-      
+
       //cout<<cur_match.dist<<endl;
-      
+
       dyad_matches.push_back(cur_match);
     }
   }
-  
-  ifstr1.close();				
+
+  ifstr1.close();
   sort(dyad_matches.begin(), dyad_matches.end(), dist_less);
 
   cout<<"Read "<<dyad_matches.size()<<" dyad matches"<<endl;
@@ -115,7 +116,7 @@ int main(int argc, char* argv[]){
       cur_match.chrom = line_fields[0];
       cur_match.pos1 = atoi(line_fields[1].c_str());
       cur_match.pos2 = atoi(line_fields[2].c_str());
-      
+
       cur_match.entry = line;
       cur_match.dist = abs(cur_match.pos1 - cur_match.pos2);
       //cout<<cur_match.dist<<endl;
@@ -123,7 +124,7 @@ int main(int argc, char* argv[]){
       mock_dyad_matches.push_back(cur_match);
     }
   }
-  
+
   ifstr2.close();
 
   cout<<"Read "<<mock_dyad_matches.size()<<" mock dyad matches"<<endl;
@@ -139,7 +140,7 @@ int main(int argc, char* argv[]){
 
   for(int i=0; i<=100; i++){
     int cur_dist = i;
-   
+
     bool _continue = true;
     while(_continue){
       if(ii>=(int)dyad_matches.size()){ _continue = false; }
@@ -147,7 +148,7 @@ int main(int argc, char* argv[]){
 	//if(cur_dist <= dyad_matches[ii].dist){
 	if(dyad_matches[ii].dist <= cur_dist){
 	  ii++;
-	} 
+	}
 	else _continue = false;
       }
     }
@@ -157,8 +158,8 @@ int main(int argc, char* argv[]){
 
       if(j_mock >= (int)mock_dyad_matches.size()){ _continue = false; }
       else{
-	//if(cur_dist <= mock_dyad_matches[j_mock].dist){ 
-	if(mock_dyad_matches[j_mock].dist <= cur_dist){ 
+	//if(cur_dist <= mock_dyad_matches[j_mock].dist){
+	if(mock_dyad_matches[j_mock].dist <= cur_dist){
 	  j_mock++;
 	} else _continue = false;
       }
@@ -170,7 +171,7 @@ int main(int argc, char* argv[]){
       } else{ _continue = false; }
       */
     }
-    
+
     /*
     _continue = true;
     while(_continue){
@@ -179,7 +180,7 @@ int main(int argc, char* argv[]){
 	else j++;
       } else { _continue = false; }
       }*/
-  
+
     double cur_qvalue;
     if(j_mock>=0)
       //cur_qvalue = ((double)j_mock)/((double)j);
@@ -188,10 +189,10 @@ int main(int argc, char* argv[]){
       assert(false); //need to add more code here
       //cur_qvalue = 1;
       //else cur_qvalue = 1/((double)dyad_matches.size()+1);
-    
+
     curve_ofstr<<cur_dist<<"\t"<<cur_qvalue<<endl;
   }
-  
+
   curve_ofstr.close();
 
   exit(1);
@@ -210,19 +211,19 @@ int main(int argc, char* argv[]){
       if(ii>=(int)dyad_matches.size()) _continue = false;
       if(cur_dist >= dyad_matches[ii].dist){
 	ii++;
-      } 
+      }
       else _continue = false;
     }
-   
+
     _continue = true;
-    
+
     while(_continue){
       if(j_mock<(int) mock_dyad_matches.size()){
 	if(cur_dist < mock_dyad_matches[j_mock].dist) _continue = false;
 	else j_mock++;
       } else{ _continue = false; }
     }
-    
+
     /*
     _continue = true;
     while(_continue){
@@ -241,12 +242,12 @@ int main(int argc, char* argv[]){
       //cur_qvalue = ((double)j)/((double)dyad_matches.size());
     //if(j!=0)
     //  cur_qvalue = ((double)j_mock)/((double)j);
-    //else 
+    //else
     //  cur_qvalue = 1;
       //else cur_qvalue = 1/((double)dyad_matches.size()+1);
     dyad_matches[i].qvalue = cur_qvalue;
     //curve_ofstr<<cur_dist<<"\t"<<cur_qvalue<<endl;
-    
+
   }
 
   sort(dyad_matches.begin(), dyad_matches.end(), coord_less);
